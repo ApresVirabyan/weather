@@ -1,6 +1,6 @@
 package weatherapp
 
-import java.net.http.HttpRequest
+import scalaj.http._
 
 /**
  * User: Apres Virabyan
@@ -9,10 +9,18 @@ import java.net.http.HttpRequest
  * Time: 9:20 AM
  */
 object model {
-  trait WeatherRequest {
-    def weatherRequest(uri: String, apiKey: String): HttpRequest
+  trait Request {
+    val endpoint: Option[String]
+    val resource: String
+    val parameters: Map[String, String]
+
+    def weatherRequest(baseUri: String, apiKey: String): HttpRequest = {
+      val versionedBaseUri = s"$baseUri/data/2.5"
+      val uriWithPath      = endpoint.map(e => s"$versionedBaseUri/$e/$resource").getOrElse(s"$versionedBaseUri/$resource")
+      val params           = ("appid", apiKey) :: parameters.toList
+      Http(uriWithPath).params(params)
+    }
   }
 
-  trait WeatherResponse
-
+  trait Response
 }
